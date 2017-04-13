@@ -2,6 +2,7 @@ package main
 
 import (
 	tl "github.com/JoelOtter/termloop"
+	"math/rand"
 )
 
 //Board to the game
@@ -11,6 +12,20 @@ type Board struct {
 	Grid []*Clickable
 }
 
+
+//ColorRect
+type ColorRect struct {
+	*tl.Rectangle
+}
+
+func (c ColorRect) Tick (ev tl.Event) {
+	colorList := [] tl.Attr{tl.ColorBlack, tl.ColorBlue, tl.ColorYellow, tl.ColorRed}
+	len := len(colorList)
+	x, y := c.Position()
+	if ev.Type == tl.EventMouse && ev.MouseX == x && ev.MouseY == y {
+		c.SetColor(colorList[rand.Intn(len)])
+	}
+}
 
 //Clickable ... add docs
 type Clickable struct {
@@ -44,7 +59,7 @@ func main(){
 	grid := []*Clickable{}
 	board := Board{hieght, width, grid}
 
-	gameColor := tl.NewRectangle(20, 20, 1, 1, tl.ColorGreen)
+	gameColor := &ColorRect{tl.NewRectangle(20, 20, 1, 1, white)}
 
 	g := tl.NewGame()
 
