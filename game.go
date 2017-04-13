@@ -43,6 +43,9 @@ func main(){
 	width := 20
 	grid := []*Clickable{}
 	board := Board{hieght, width, grid}
+
+	gameColor := tl.NewRectangle(20, 20, 1, 1, tl.ColorGreen)
+
 	g := tl.NewGame()
 
 	// Used to created the board
@@ -54,5 +57,6 @@ func main(){
 			board.Grid = append(board.Grid, tempt)
 		}
 	}
+	g.Screen().AddEntity(gameColor)
 	g.Start()
 }
