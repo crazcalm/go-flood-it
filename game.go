@@ -5,6 +5,23 @@ import (
 	"math/rand"
 )
 
+//Game
+type Game struct {
+	Board *Board
+	CurrentColor tl.Attr
+	Turn int
+}
+
+//ChangeColor
+func (g *Game) ChangeColor () tl.Attr {
+	colorList := [] tl.Attr{tl.ColorBlack, tl.ColorBlue, tl.ColorCyan, tl.ColorRed,
+							tl.ColorGreen, tl.ColorYellow, tl.ColorWhite, tl.ColorMagenta}
+	numOfColors := len(colorList)
+	g.CurrentColor = colorList[rand.Intn(numOfColors)]
+	return g.CurrentColor
+}
+
+
 //Board to the game
 type Board struct {
 	Hieght int
@@ -16,34 +33,34 @@ type Board struct {
 //ColorRect
 type ColorRect struct {
 	*tl.Rectangle
+	Game *Game
 }
 
 func (c ColorRect) Tick (ev tl.Event) {
-	colorList := [] tl.Attr{tl.ColorBlack, tl.ColorBlue, tl.ColorYellow, tl.ColorRed}
-	len := len(colorList)
 	x, y := c.Position()
 	if ev.Type == tl.EventMouse && ev.MouseX == x && ev.MouseY == y {
-		c.SetColor(colorList[rand.Intn(len)])
+		c.SetColor(c.Game.ChangeColor())
 	}
 }
 
 //Clickable ... add docs
 type Clickable struct {
 	*tl.Rectangle
-	Grid *Board
+	Game *Game
 }
 
 //Tick ... add docs
 func (c *Clickable) Tick (ev tl.Event) {
 	x, y := c.Position()
 	if ev.Type == tl.EventMouse && ev.MouseX == x && ev.MouseY == y {
-		c.SetColor(tl.ColorRed)
+		c.SetColor(c.Game.CurrentColor)
+		c.Game.Turn += 1
 	}
 }
 
 //NewClickable ... add docs
-func NewClickable(x, y, w, h int, col tl.Attr, b *Board) *Clickable {
-	return &Clickable{tl.NewRectangle(x, y, w, h, col,), b}
+func NewClickable(x, y, w, h int, col tl.Attr, g *Game) *Clickable {
+	return &Clickable{tl.NewRectangle(x, y, w, h, col,), g}
 }
 
 
@@ -58,8 +75,10 @@ func main(){
 	width := 20
 	grid := []*Clickable{}
 	board := Board{hieght, width, grid}
+	game := Game{&board, white, 0}
 
-	gameColor := &ColorRect{tl.NewRectangle(20, 20, 1, 1, white)}
+
+	gameColor := &ColorRect{tl.NewRectangle(20, 20, 1, 1, white), &game}
 
 	g := tl.NewGame()
 
@@ -67,7 +86,7 @@ func main(){
 	var tempt *Clickable
 	for w:=0; w < board.Width; w++{
 		for h:=0; h < board.Hieght; h++{
-			tempt = NewClickable(h, w, 1, 1, white, &board)
+			tempt = NewClickable(h, w, 1, 1, white, &game)
 			g.Screen().AddEntity(tempt)
 			board.Grid = append(board.Grid, tempt)
 		}
